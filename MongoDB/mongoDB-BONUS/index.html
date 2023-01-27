@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="/font/bootstrap-icons.css" />
+        <title>Home</title>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Product List</h1>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newProduct">
+                <i class="bi bi-plus"></i> Add New Product
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="newProduct" tabindex="-1" aria-labelledby="newProductLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="newProductLabel">New Product</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <form action="http://127.0.0.1:3000/product/new" method="POST">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="number" class="form-control" id="price" name="price" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" />
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success">Add New Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table table-striped">
+                <thead>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </thead>
+                <tbody id="product-data">
+                    <!-- <tr>
+                        <td>1</td>
+                        <td>Phone</td>
+                        <td>1,500</td>
+                        <td>4</td>
+                        <td>
+                            <i class="bi bi-pencil-square text-primary fw-bold fs-5"></i>
+                            <i class="bi bi-trash text-danger fw-bold fs-5"></i>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>Laptop</td>
+                        <td>7,378</td>
+                        <td>12</td>
+                        <td>
+                            <i class="bi bi-pencil-square text-primary fw-bold fs-5"></i>
+                            <i class="bi bi-trash text-danger fw-bold fs-5"></i>
+                        </td>
+                    </tr> -->
+                </tbody>
+            </table>
+        </div>
+        <script src="/dist/js/bootstrap.bundle.js"></script>
+        <!-- <script src="main.js"></script> -->
+        <script>
+            let tableBody = document.getElementById("product-data");
+
+            let prductName = document.getElementById("prductName");
+            let productPrice = document.getElementById("productPrice");
+            let productQuantity = document.getElementById("productQuantity");
+
+            async function getData() {
+                try {
+                    let res = await fetch("http://127.0.0.1:3000/product/");
+                    let data = await res.json();
+                    data.forEach((item) => {
+                        tableBody.innerHTML += addNewTr(item);
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+
+            function addNewTr(item) {
+                return `
+                    <tr>
+                        <td>${item._id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.price}</td>
+                        <td>${item.quantity}</td>
+                        <td>
+                            
+                                
+                            ${editTr(item)}
+                            <form action="http://127.0.0.1:3000/product/delete/${
+                                item._id
+                            }?_method=DELETE" method="POST" class="d-inline">
+                                <button type="submit" id="delete-${
+                                    item._id
+                                }" class="bi bi-trash text-danger fw-bold fs-5" style="border: none; background: none;"></button>
+                            </form>
+                        </td>
+                    </tr>
+                `;
+            }
+            function editTr(item) {
+                return `
+                    <i type="button" class="bi bi-pencil-square text-primary fw-bold fs-5" data-bs-toggle="modal" data-bs-target="#edit-${item._id}">
+                    </i>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="edit-${item._id}" tabindex="-1" aria-labelledby="edit-${item._id}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="edit-${item._id}">Edit Product</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <form action="/product/edit/${item._id}?_method=PATCH" method="POST">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" value="${item.name}" />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label">Price</label>
+                                            <input type="number" class="form-control" id="price" name="price" value="${item.price}"/>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="quantity" class="form-label">Quantity</label>
+                                            <input type="number" class="form-control" id="quantity" name="quantity" value="${item.quantity}"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            getData();
+        </script>
+    </body>
+</html>
